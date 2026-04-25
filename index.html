@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chart Builder</title>
+    <meta name="description" content="Build beautiful animated horizontal bar charts. Add series, categories, and export as video, PNG, or SVG." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="sidebar">
+
+        <!-- ─── Header ─── -->
+        <div class="sidebar-header">
+          <div class="brand">
+            <span class="brand-icon">◩</span>
+            <div>
+              <h1>Chart Builder</h1>
+              <p class="subtitle">Animated horizontal bar charts</p>
+            </div>
+          </div>
+          <button id="reset-data" class="icon-btn" type="button" title="Reset to defaults">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 1 3 6.7"/><polyline points="3 6 3 12 9 12"/></svg>
+          </button>
+        </div>
+
+        <!-- ─── Chart Settings ─── -->
+        <details class="settings-group" open>
+          <summary class="group-title">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Chart Settings
+          </summary>
+          <div class="settings-body">
+            <div class="settings-row">
+              <label class="setting-item">
+                <span class="setting-label">Background</span>
+                <input id="background-color" type="color" />
+              </label>
+              <label class="setting-item">
+                <span class="setting-label">Duration (s)</span>
+                <input id="duration-seconds" type="number" min="3" max="30" step="1" />
+              </label>
+            </div>
+            <div class="settings-row">
+              <label class="setting-item checkbox-item">
+                <input id="transparent-background" type="checkbox" />
+                <span class="setting-label">Transparent background</span>
+              </label>
+              <label class="setting-item checkbox-item">
+                <input id="animate-fade" type="checkbox" />
+                <span class="setting-label">Fade-in animation</span>
+              </label>
+            </div>
+            <label class="setting-item full-width">
+              <span class="setting-label">Background image</span>
+              <div class="bg-image-input">
+                <input id="bg-image-upload" type="file" accept="image/*" />
+                <button id="bg-image-clear" class="small-btn" type="button">Clear</button>
+              </div>
+            </label>
+          </div>
+        </details>
+
+        <!-- ─── Series (was Models) ─── -->
+        <details class="settings-group" open>
+          <summary class="group-title">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            Series
+            <span class="badge" id="series-count">2</span>
+          </summary>
+          <div class="settings-body">
+            <div id="models-editor" class="stack"></div>
+            <button id="add-model" class="add-btn" type="button">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Series
+            </button>
+          </div>
+        </details>
+
+        <!-- ─── Categories (was Benchmarks) ─── -->
+        <details class="settings-group" open>
+          <summary class="group-title">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            Categories
+            <span class="badge" id="categories-count">5</span>
+          </summary>
+          <div class="settings-body">
+            <div id="benchmarks-editor" class="stack"></div>
+            <button id="add-benchmark" class="add-btn" type="button">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Category
+            </button>
+          </div>
+        </details>
+
+      </aside>
+
+      <section class="workspace">
+        <div class="preview-toolbar">
+          <div class="export-row">
+            <span class="export-label">Export</span>
+            <button id="export-video" class="export-btn" type="button">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/><line x1="17" y1="17" x2="22" y2="17"/></svg>
+              Video
+            </button>
+            <button id="export-png" class="export-btn" type="button">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              PNG
+            </button>
+            <button id="export-svg" class="export-btn" type="button">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              SVG
+            </button>
+          </div>
+        </div>
+
+        <div class="preview-frame">
+          <div id="chart-preview" class="chart-preview">
+            <canvas id="preview-canvas" width="1920" height="1080"></canvas>
+          </div>
+        </div>
+
+        <!-- Transport bar -->
+        <div class="transport-bar">
+          <div class="transport-controls">
+            <button id="skip-backward" class="transport-btn" type="button" title="Back 1s">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <polygon points="11,5 3,12 11,19" /><polygon points="20,5 12,12 20,19" />
+              </svg>
+            </button>
+            <button id="play-animation" class="transport-btn play-btn" type="button" title="Play / Pause">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                <polygon points="5,3 19,12 5,21" />
+              </svg>
+            </button>
+            <button id="skip-forward" class="transport-btn" type="button" title="Forward 1s">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <polygon points="4,5 12,12 4,19" /><polygon points="13,5 21,12 13,19" />
+              </svg>
+            </button>
+          </div>
+          <input id="timeline-slider" type="range" min="0" max="1" step="0.001" value="1" class="timeline-slider" />
+          <span id="time-display" class="time-display">0.0s / 12s</span>
+        </div>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
