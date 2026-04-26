@@ -448,9 +448,16 @@ function drawChartFrame(canvas, progress = 1) {
     drawFittedText(context, benchmark.detail, layout.panelX + layout.paddingX, labelY + layout.detailFont + 10, layout.labelColumn - 20, layout.detailFont, "400", "#a2a2a2");
     if (fade) context.restore();
 
+    /* Find the highest score in this category */
+    let highestValue = 0;
+    for (const m of state.models) {
+      const v = benchmark.scores[m.id] ?? 0;
+      if (v > highestValue) highestValue = v;
+    }
+
     state.models.forEach((model, modelIndex) => {
       const rawValue = benchmark.scores[model.id] ?? 0;
-      const barPercent = Math.min(100, rawValue); // bar caps at 100%
+      const barPercent = Math.min(100, rawValue);
       const y = barsTop + modelIndex * (layout.barHeight + layout.barGap);
       const fullBarWidth = layout.barColumnWidth * (barPercent / 100);
       const animatedWidth = fullBarWidth * rowProgress;
@@ -472,12 +479,22 @@ function drawChartFrame(canvas, progress = 1) {
         context.fill();
       }
 
-      /* Value label — shows REAL value (can exceed 100) */
-      if (modelIndex === 0 && rowProgress > 0.05) {
+      /* Value label for each bar */
+      if (rowProgress > 0.05) {
         const displayValue = (rawValue * rowProgress).toFixed(1);
+        const isHighest = rawValue === highestValue;
         context.save();
         context.globalAlpha = Math.min(1, rowProgress * 2);
-        drawFittedText(context, `${displayValue}%`, valueX, y + layout.barHeight * 0.75, layout.valueColumn, layout.valueFont + 4, "780", "#f1f1f1");
+        drawFittedText(
+          context,
+          `${displayValue}%`,
+          valueX,
+          y + layout.barHeight * 0.75,
+          layout.valueColumn,
+          isHighest ? layout.valueFont + 2 : layout.valueFont,
+          isHighest ? "780" : "500",
+          isHighest ? "#f1f1f1" : "#6b7280",
+        );
         context.restore();
       }
     });
@@ -517,21 +534,31 @@ function chartSvg() {
     const rowY = contentTop + ri * (layout.rowHeight + layout.rowGap);
     const labelY = rowY + layout.rowHeight * 0.34;
     const barsTop = rowY + layout.rowHeight * 0.18;
+
+    let highestValue = 0;
+    for (const m of state.models) {
+      const v = benchmark.scores[m.id] ?? 0;
+      if (v > highestValue) highestValue = v;
+    }
+
     const bars = state.models.map((model, mi) => {
       const rawValue = benchmark.scores[model.id] ?? 0;
       const barPercent = Math.min(100, rawValue);
       const y = barsTop + mi * (layout.barHeight + layout.barGap);
       const width = layout.barColumnWidth * (barPercent / 100);
-      const labelX = Math.min(barX + width + 10, barX + layout.barColumnWidth - 54);
+      const isHighest = rawValue === highestValue;
+      const vx = barX + layout.barColumnWidth + layout.columnGap;
       return `
         <rect x="${barX}" y="${y}" width="${layout.barColumnWidth}" height="${layout.barHeight}" rx="4" fill="rgba(255,255,255,0.055)" />
         <rect x="${barX}" y="${y}" width="${width}" height="${layout.barHeight}" rx="4" fill="${model.color}" />
-        <text x="${labelX}" y="${y + layout.barHeight * 0.72}" fill="#f1f1f1" font-size="${layout.valueFont}" font-weight="780">${rawValue.toFixed(1)}%</text>`;
+        <text x="${vx}" y="${y + layout.barHeight * 0.75}" fill="${isHighest ? '#f1f1f1' : '#6b7280'}" font-size="${isHighest ? layout.valueFont + 2 : layout.valueFont}" font-weight="${isHighest ? '780' : '500'}">${rawValue.toFixed(1)}%</text>`;
     }).join("");
+
     return `<g>
       <text x="${layout.panelX + layout.paddingX}" y="${labelY}" fill="#f3f3f3" font-size="${layout.labelFont}" font-weight="780">${escapeHtml(benchmark.label)}</text>
       <text x="${layout.panelX + layout.paddingX}" y="${labelY + layout.detailFont + 10}" fill="#a2a2a2" font-size="${layout.detailFont}">${escapeHtml(benchmark.detail)}</text>
-      ${bars}</g>`;
+      ${bars}
+    </g>`;
   }).join("");
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${layout.width} ${layout.height}" width="${layout.width}" height="${layout.height}">
@@ -748,8 +775,17 @@ document.addEventListener("input", (event) => {
     const m = state.models.find((i) => i.id === modelName);
     if (m) {
       m.name = target.value;
+      /* Update card header in Series section */
       const card = target.closest(".editor-card");
       if (card) card.querySelector(".row-actions strong").textContent = target.value;
+      /* Update score labels in ALL category cards that reference this model */
+      document.querySelectorAll(`[data-score-model="${modelName}"]`).forEach((input) => {
+        const row = input.closest(".score-row");
+        if (row) {
+          const span = row.querySelector("span");
+          if (span) span.textContent = target.value;
+        }
+      });
       saveState(); renderChart();
     }
     return;
